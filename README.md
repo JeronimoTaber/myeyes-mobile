@@ -3,7 +3,7 @@ Aplicacion Android que detecta objetos y provee indicaciones sobre su posicion r
 
 ## Features
 - Deteccion de billeteras, lentes y llaves
-- 
+
 To Do:
 - Seleccion de objetos
 - Guia hacia objetos
