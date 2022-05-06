@@ -8,14 +8,13 @@ To Do:
 - Seleccion de objetos
 - Guia hacia objetos
 
-##Instalacion 
-
+## Instalacion 
 1) Instalar [Android Studio] (https://developer.android.com/studio/install#linux)
 2) Importar aplicacion
 2.1) Generar un emulador de android o generar la coleccion a un dispositivo movil 
 
 
-##Cambio de modelo
+## Cambio de modelo
 En el caso que se desee cambia el modelo utilizado se deben reemplazar los achivos
 - `detect.tflite`
 - `labelmap.txt`
