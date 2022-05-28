@@ -15,7 +15,7 @@
  */
 
 package org.tensorflow.lite.examples.detection;
-
+import android.content.Intent;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
@@ -25,6 +25,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.AudioManager;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
@@ -37,7 +38,9 @@ import android.os.Trace;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Size;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -50,8 +53,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.nio.ByteBuffer;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
+import org.tensorflow.lite.examples.detection.services.TTS_Service;
 
 public abstract class CameraActivity extends AppCompatActivity
     implements OnImageAvailableListener,
@@ -59,7 +65,9 @@ public abstract class CameraActivity extends AppCompatActivity
         CompoundButton.OnCheckedChangeListener,
         View.OnClickListener {
   private static final Logger LOGGER = new Logger();
-
+  private String[] selector;
+  private Integer eleccion;
+  private ReentrantLock lock;
   private static final int PERMISSIONS_REQUEST = 1;
 
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
@@ -85,14 +93,27 @@ public abstract class CameraActivity extends AppCompatActivity
   private ImageView plusImageView, minusImageView;
   private SwitchCompat apiSwitchCompat;
   private TextView threadsTextView;
-
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
+
+    //Inicializacion Service de TTS
+    startService(new Intent(this, TTS_Service.class));
+
+    //Selector de opciones
+    this.selector = new String[]{" sin busqueda","lente", "llave", "billetera"};
+    this.eleccion = 0;
+    this.lock = new ReentrantLock();
+
+    //Configuracion volumen
+    AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 20, 0);
+
     LOGGER.d("onCreate " + this);
     super.onCreate(null);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     setContentView(R.layout.tfe_od_activity_camera);
+
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
     getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -547,4 +568,63 @@ public abstract class CameraActivity extends AppCompatActivity
   protected abstract void setNumThreads(int numThreads);
 
   protected abstract void setUseNNAPI(boolean isChecked);
+  protected String[] getSelector(){
+    return this.selector;
+  };
+  protected Integer getEleccion(){
+    return this.eleccion;
+  };
+  protected Void setEleccion(Integer valor){
+    this.eleccion = valor;
+    return null;
+  };
+  public boolean dispatchKeyEvent(KeyEvent event) {
+    int action = event.getAction();
+    int keyCode = event.getKeyCode();
+    switch (keyCode) {
+      case KeyEvent.KEYCODE_VOLUME_UP:
+        if (action == KeyEvent.ACTION_DOWN) {
+          this.lock.lock();
+          String[] selector = getSelector();
+          Integer eleccion = getEleccion();
+          if (selector.length-1 == eleccion){
+            eleccion =0;
+          }
+          else{
+            eleccion =  eleccion + 1;
+          }
+
+          LOGGER.d("%s", eleccion);
+          Intent tts_intent = new Intent(getApplicationContext(), TTS_Service.class);
+          tts_intent.putExtra(TTS_Service.EXTRA_TTS_TEXT, "alta: "+selector[eleccion]+"elegida");
+          startService(tts_intent);
+          setEleccion(eleccion);
+          this.lock.unlock();
+        }
+        return true;
+      case KeyEvent.KEYCODE_VOLUME_DOWN:
+        if (action == KeyEvent.ACTION_DOWN) {
+          this.lock.lock();
+          String[] selector = getSelector();
+          Integer eleccion = getEleccion();
+          if (eleccion == 0){
+            eleccion = selector.length-1;
+          }
+          else{
+            eleccion = eleccion - 1;
+          }
+
+          LOGGER.d("%s", eleccion);
+          Intent tts_intent = new Intent(getApplicationContext(), TTS_Service.class);
+          tts_intent.putExtra(TTS_Service.EXTRA_TTS_TEXT, "alta: "+ selector[eleccion]+"elegida");
+          startService(tts_intent);
+          setEleccion(eleccion);
+          this.lock.unlock();
+        }
+
+        return true;
+      default:
+        return super.dispatchKeyEvent(event);
+    }
+  }
 }
