@@ -35,4 +35,6 @@ El proyecto fue creado con :
 * Android SDK minimo version: 21
 * Android SDK target version: 31
 
+###Acknowledgment
+- Aplicacion base de [Tensorflow Lite Object Detection](https://github.com/tensorflow/examples/tree/master/lite/examples/object_detection/android)
 
