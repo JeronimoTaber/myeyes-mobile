@@ -33,6 +33,6 @@ Se deben hacer modificaciones en `DetectorActivity`
 El proyecto fue creado con :
 * Android Studio version: Bumblebee | 2021.1.1
 * Android SDK minimo version: 21
-* Android SDK target version: 30
+* Android SDK target version: 31
 
 

@@ -17,6 +17,7 @@
         android:theme="@style/AppTheme.ObjectDetection">
 
         <activity
+            android:exported="true"
             android:name=".DetectorActivity"
             android:label="@string/tfe_od_app_name"
             android:screenOrientation="portrait">
