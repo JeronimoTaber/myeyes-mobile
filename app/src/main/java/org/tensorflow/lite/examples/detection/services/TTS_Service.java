@@ -2,10 +2,12 @@ package org.tensorflow.lite.examples.detection.services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import org.tensorflow.lite.examples.detection.R;
 import org.tensorflow.lite.examples.detection.env.Logger;
 
 import java.util.Locale;
@@ -27,7 +29,9 @@ public class TTS_Service extends Service implements TextToSpeech.OnInitListener{
     private String textToSpeak;
     private static boolean initDone;
     private TextToSpeech tts;
+    private MediaPlayer mediaPlayer;
     private static final Logger LOGGER = new Logger();
+    private boolean play = false;
 
     /* ON CREATE */
     /* ********* */
@@ -36,6 +40,8 @@ public class TTS_Service extends Service implements TextToSpeech.OnInitListener{
         super.onCreate();
         initDone = false;
         tts = new TextToSpeech(this,this/*OnInitListener*/);
+        mediaPlayer = MediaPlayer.create(this, R.raw.z);
+
         LOGGER.i(TAG, "TTS lala");
     }
     /* ON INIT */
@@ -103,14 +109,154 @@ public class TTS_Service extends Service implements TextToSpeech.OnInitListener{
                 boolean matchFound = m.find();
                 if(matchFound) {
                     tts.stop();
-                    textToSpeak = textToSpeak.substring(7,textToSpeak.length());
-                    tts.speak(" " + textToSpeak, TextToSpeech.QUEUE_FLUSH, null,null);
+                    mediaPlayer.stop();
+                    textToSpeak = textToSpeak.substring(6,textToSpeak.length());
+                    if(textToSpeak.equals("billetera")){
+                        LOGGER.d("Entro"+textToSpeak);
+                        mediaPlayer = MediaPlayer.create(this, R.raw.b_e);
+                    } else if(textToSpeak.equals("llave")){
+                        mediaPlayer = MediaPlayer.create(this, R.raw.ll_e);
+
+                    } else if(textToSpeak.equals("lente")){
+                        mediaPlayer = MediaPlayer.create(this, R.raw.l_e);
+                    } else{
+                        mediaPlayer = MediaPlayer.create(this, R.raw.vs);
+                    }
+                    mediaPlayer.start();
+                    tts.speak("", TextToSpeech.QUEUE_FLUSH, null,null);                    //tts.speak(" " + textToSpeak, TextToSpeech.QUEUE_FLUSH, null,null);
 
                 }
                 else{
-                    if(!tts.isSpeaking()) {
-                        tts.speak(" " + textToSpeak, TextToSpeech.QUEUE_FLUSH, null,null);
+                    if(!mediaPlayer.isPlaying()){
+
+                        LOGGER.d("TEXTO A EMITIR "+textToSpeak);
+
+                        if(textToSpeak.equals("billetera")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b);
+                            play = true;
+                        }else if(textToSpeak.equals("llave")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll);
+                            play = true;
+                        }else if(textToSpeak.equals("lente")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l);
+                            play = true;
+                        }else if(textToSpeak.equals("billetera arriba")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_a);
+                            play = true;
+
+                        } else if(textToSpeak.equals("billetera abajo")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_ab);
+                            play = true;
+
+                        } else if(textToSpeak.equals("billetera derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_d);
+                            play = true;
+
+                        } else if(textToSpeak.equals("billetera izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_i);
+                            play = true;
+
+                        }else if(textToSpeak.equals("billetera arriba derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_a_d);
+                            play = true;
+
+                        }else if(textToSpeak.equals("billetera arriba izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_a_i);
+                            play = true;
+
+                        }else if(textToSpeak.equals("billetera abajo derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_ab_d);
+                            play = true;
+
+                        }else if(textToSpeak.equals("billetera abajo izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_ab_i);
+                            play = true;
+
+                        }else if(textToSpeak.equals("billetera centro")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.b_c);
+                            play = true;
+
+                        }else if(textToSpeak.equals("llave arriba")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_a);
+                            play = true;
+
+                        } else if(textToSpeak.equals("llave abajo")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_ab);
+                            play = true;
+
+                        } else if(textToSpeak.equals("llave derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_d);
+                            play = true;
+
+                        } else if(textToSpeak.equals("llave izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_i);
+                            play = true;
+
+                        }else if(textToSpeak.equals("llave arriba derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_a_d);
+                            play = true;
+
+                        }else if(textToSpeak.equals("llave arriba izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_a_i);
+                            play = true;
+
+                        }else if(textToSpeak.equals("llave abajo derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_ab_d);
+                            play = true;
+
+                        }else if(textToSpeak.equals("llave abajo izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_ab_i);
+                            play = true;
+
+                        }else if(textToSpeak.equals("llave centro")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.ll_c);
+                            play = true;
+
+                        }else if(textToSpeak.equals("lente arriba")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_a);
+                            play = true;
+
+                        } else if(textToSpeak.equals("lente abajo")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_ab);
+                            play = true;
+
+                        } else if(textToSpeak.equals("lente derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_d);
+                            play = true;
+
+                        } else if(textToSpeak.equals("lente izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_i);
+                            play = true;
+
+                        }else if(textToSpeak.equals("lente arriba derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_a_d);
+                            play = true;
+
+                        }else if(textToSpeak.equals("lente arriba izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_a_i);
+                            play = true;
+                        }else if(textToSpeak.equals("lente abajo derecha")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_ab_d);
+                            play = true;
+                        }else if(textToSpeak.equals("lente abajo izquierda")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_ab_i);
+                            play = true;
+                        } else if(textToSpeak.equals("lente centro")){
+                            mediaPlayer = MediaPlayer.create(this, R.raw.l_c);
+                            play = true;
+
+                        }else{
+                            play = false;
+                        }
+                        LOGGER.d("TEXTP "+play);
+
+                        if(play){
+                            LOGGER.d("Entro  "+play);
+                            mediaPlayer.start();
+                        }
                     }
+                        tts.speak("", TextToSpeech.QUEUE_FLUSH, null,null);
+
                 }
 
                 //}

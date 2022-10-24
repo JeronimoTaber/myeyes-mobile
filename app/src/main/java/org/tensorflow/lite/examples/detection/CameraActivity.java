@@ -15,10 +15,12 @@
  */
 
 package org.tensorflow.lite.examples.detection;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -30,10 +32,12 @@ import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Trace;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -53,17 +57,22 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
+import org.tensorflow.lite.examples.detection.services.PlaybackUtils;
+import org.tensorflow.lite.examples.detection.services.ServiceUtils;
 import org.tensorflow.lite.examples.detection.services.TTS_Service;
 
 public abstract class CameraActivity extends AppCompatActivity
     implements OnImageAvailableListener,
         Camera.PreviewCallback,
         CompoundButton.OnCheckedChangeListener,
-        View.OnClickListener {
+        View.OnClickListener, ServiceConnection {
+  private ServiceUtils.ServiceToken mToken;
   private static final Logger LOGGER = new Logger();
   private String[] selector;
   private Integer eleccion;
@@ -93,9 +102,22 @@ public abstract class CameraActivity extends AppCompatActivity
   private ImageView plusImageView, minusImageView;
   private SwitchCompat apiSwitchCompat;
   private TextView threadsTextView;
+  int[] tracks = new int[10];
+  private HashMap<String,MediaPlayer> mPlayerList = new HashMap<String,MediaPlayer>();
+  @Override
+  public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+    //Hooray, we've connected to our service.
+    //If we've arrived here, we should be able to make any calls via our PlaybackUtils class, and expect the service to
+    //respond accordingly
+  }
+
+  @Override
+  public void onServiceDisconnected(ComponentName componentName) {
+    //The service is disconnected.. We don't really care about this.. do we?
+  }
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
-
+    super.onCreate(savedInstanceState);
     //Inicializacion Service de TTS
     startService(new Intent(this, TTS_Service.class));
 
@@ -106,14 +128,19 @@ public abstract class CameraActivity extends AppCompatActivity
 
     //Configuracion volumen
     AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 20, 0);
+    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 30, 0);
+    //Let the device know that we're playing music, and volume controls should affect the music stream
+    //Bind to our Music Service. This is where the magic happens!
+
 
     LOGGER.d("onCreate " + this);
-    super.onCreate(null);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     setContentView(R.layout.tfe_od_activity_camera);
-
+    if (PlaybackUtils.isPlaying()) {
+      PlaybackUtils.stop();
+    }
+    PlaybackUtils.openFile("sample.mp3");
 
 
     if (hasPermission()) {
@@ -351,6 +378,10 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public synchronized void onDestroy() {
     LOGGER.d("onDestroy " + this);
+    if (mToken != null) {
+      ServiceUtils.unbindFromService(mToken);
+      mToken = null;
+    }
     super.onDestroy();
   }
 
@@ -594,7 +625,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
           LOGGER.d("%s", eleccion);
           Intent tts_intent = new Intent(getApplicationContext(), TTS_Service.class);
-          tts_intent.putExtra(TTS_Service.EXTRA_TTS_TEXT, "alta: "+selector[eleccion]+"elegida");
+          tts_intent.putExtra(TTS_Service.EXTRA_TTS_TEXT, "alta: "+selector[eleccion]);
           startService(tts_intent);
           setEleccion(eleccion);
           this.lock.unlock();
@@ -614,7 +645,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
           LOGGER.d("%s", eleccion);
           Intent tts_intent = new Intent(getApplicationContext(), TTS_Service.class);
-          tts_intent.putExtra(TTS_Service.EXTRA_TTS_TEXT, "alta: "+ selector[eleccion]+"elegida");
+          tts_intent.putExtra(TTS_Service.EXTRA_TTS_TEXT, "alta: "+ selector[eleccion]);
           startService(tts_intent);
           setEleccion(eleccion);
           this.lock.unlock();

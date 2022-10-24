@@ -221,22 +221,35 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                                         if (location.centerY() >= 440) {
                                             localizacionY = " abajo";
+
+                                            if (location.centerX() >= 440) {
+                                                localizacionX = " derecha";
+                                            }
+                                            else if(location.centerX() <= 280){
+                                                localizacionX = " izquierda";
+                                            }
                                         }
                                         else if(location.centerY() <= 280){
                                             localizacionY = " arriba";
-                                        }
-                                        else {
-                                            localizacionY = " centro";
 
+                                            if (location.centerX() >= 440) {
+                                                localizacionX = " derecha";
+                                            }
+                                            else if(location.centerX() <= 280){
+                                                localizacionX = " izquierda";
+                                            }
                                         }
-                                        if (location.centerX() >= 440) {
-                                            localizacionX = " a la derecha";
-                                        }
-                                        else if(location.centerX() <= 280){
-                                            localizacionX = " a la izquierda ";
-                                        }
+
                                         else {
-                                            localizacionX = " ";
+                                            if (location.centerX() >= 440) {
+                                                localizacionX = " derecha";
+                                            }
+                                            else if(location.centerX() <= 280){
+                                                localizacionX = " izquierda";
+                                            } else{
+                                                localizacionX = " centro";
+
+                                            }
 
                                         }
 
